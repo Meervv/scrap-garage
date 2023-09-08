@@ -22,14 +22,16 @@ async function getInfosDepartement(region, departement) {
       }
 
       const html = await response.text();
-      const $ = cheerio.load(html);
+      // const $ = cheerio.load(html);
+      const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
 
       // Utilisez $ pour sélectionner et traiter les informations du département ici
-      const rdvCardBodies = $('.rdv-card_body');
+      const rdvCardBodies = doc.querySelector('.rdv-card_body');
 
       rdvCardBodies.each((index, element) => {
         // Sélectionnez l'élément <a> à l'intérieur de chaque div
-        const lien = $(element).find('a').attr('href');
+        const lien = doc.querySelector(element).find('a').attr('href');
         donneesDepartement.informations.push({
           lien: lien
         });
@@ -51,19 +53,21 @@ async function getDataOnOnePage(url) {
     }
 
     const html = await response.text();
-    const $ = cheerio.load(html);
+    // const $ = cheerio.load(html);
+      const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
  
-    const pageTitle = $('.ficheCentre-title').text().trim();
+    const pageTitle = doc.querySelector('.ficheCentre-title').text().trim();
     const title = pageTitle.split('\n')[0];
-    const pageNote = $('.ficheCentre-ratings_score').text().trim();
+    const pageNote = doc.querySelector('.ficheCentre-ratings_score').text().trim();
     const note = pageNote.split('\n')[0];
-    const pageAvis = $('.rdv-card_ratingsTotal button').text();
+    const pageAvis = doc.querySelector('.rdv-card_ratingsTotal button').text();
     const avis = pageAvis.split(')')[0].replace(/\(/, '');
-    const itineraire = $('a:contains("Itinéraire")').attr('href');
+    const itineraire = doc.querySelector('a:contains("Itinéraire")').attr('href');
     // const cta_rdv = $('a:contains("Prendre rendez-vous")').attr('href');
-    const adresse = $('.address').text().trim();
-    const telephone = $('a[href^="tel:"]').attr('href').trim();
-    const horaires = $('.ficheCentre-schedule').text().trim();
+    const adresse = doc.querySelector('.address').text().trim();
+    const telephone = doc.querySelector('a[href^="tel:"]').attr('href').trim();
+    const horaires = doc.querySelector('.ficheCentre-schedule').text().trim();
     const horairesClean = horaires.replace(/\n/g, '').replace(/\s/g, '');
 
     const pageData = {
